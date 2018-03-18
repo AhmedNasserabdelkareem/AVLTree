@@ -13,6 +13,7 @@ public class Node<T extends Comparable<T>> implements INode<T> {
 	private Node<T> right;
 	private Node<T> parent;
 	private int index;
+	private int height;
 	@Override
 	public INode<T> getLeftChild() {
 		// TODO Auto-generated method stub
@@ -38,8 +39,14 @@ public class Node<T extends Comparable<T>> implements INode<T> {
 		
 	}
 	
-
-
+	public void setHeight(int height)
+	{
+		this.height=height;
+	}
+	public int getHeight()
+	{
+		return height;
+	}
 	public int getIndex() {
 		return index;
 	}
@@ -60,7 +67,14 @@ public class Node<T extends Comparable<T>> implements INode<T> {
 	public void setParent(Node<T> parent) {
 		this.parent = parent;
 	}
-	
+	public Node<T> getleft()
+	{
+		return left;
+	}
+	public Node<T> getright()
+	{
+		return right;
+	}
 
 	public int getLeftIndex() {
 		return (index * 2) + 1;
@@ -70,7 +84,10 @@ public class Node<T extends Comparable<T>> implements INode<T> {
 		return (index * 2) + 2;
 
 	}
-
+	public Node<T> getParent()
+	{
+		return parent;
+	}
 	public int getParentIndex() {
 		if ((index-1)<0) {
 			return -1;
