@@ -65,6 +65,7 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 			{
 				
 			}
+			
 			else if(position==2&&p==2)// x->right y && y->right z 
 			{
 				
