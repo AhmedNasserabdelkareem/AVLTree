@@ -8,10 +8,9 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 
 	@Override
 	public void insert(T key) {
-		// TODO Auto-generated method stub
 		Node<T> temp = new Node<T>();
+		boolean heightflag=false;
 		temp.setValue(key);
-		int childPosition;
 		if (root == null) {
 			root = temp;
 			return;
@@ -20,13 +19,13 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 			Node<T> currentParent;
 			while (true) {
 				currentParent = index;
-				index.setHeight(index.getHeight() + 1);
 				if ((int) key < (int) index.getValue()) {
 					index = (Node<T>) index.getLeftChild();
 					if (index == null) {
 						currentParent.setLeftChild(temp);
 						temp.setParent(currentParent);
-						childPosition=1;
+						if(currentParent.getRightChild()==null)
+							heightflag=true;
 						break;
 					}
 				} else {
@@ -34,82 +33,269 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 					if (index == null) {
 						currentParent.setRightChild(temp);
 						temp.setParent(currentParent);
-						childPosition=2;
+						if(currentParent.getLeftChild()==null)
+							heightflag=true;
 						break;
 					}
 				}
 			}
 		}
-		balance(temp,childPosition);
+		
+		if(heightflag)
+		{
+			increaseHeight(temp.getParent(),1);
+		}
+		balance(temp);
 		// balance method here
 
 	}
 
-	private void balance(Node<T> temp,int position) {
-		// TODO Auto-generated method stub
-		Node<T> parent = temp.getParent();
-		int p;
-		if(parent==null)
+	private void increaseHeight(Node<T> temp, int x) {
+		if(temp!=null)
+		{
+			temp.setHeight(temp.getHeight()+x);
+			//check if we need to increase parent height too
+			increaseHeight(temp.getParent(),x);
+		}
+		
+	}
+
+	private void balance(Node<T> temp) {
+		if(temp==null)
 			return;
-		if(parent.getleft().equals(temp))
-			p=1;
-		else
-			p=2;
+		Node<T> parent = temp.getParent();
 		if(checkbalance(parent))//balanced
 		{
-		  balance(parent.getParent(),p);	
+		  balance(parent);	
 		}
 		else//unbalanced
 		{
-			if(position==1&&p==1)// x->left y && y->left z
+			int yz=0;
+			int xy=0;
+			System.out.println(temp.getValue()+"kjhub");
+			if(temp.getLeftChild()==null)
+				xy=2;
+			else if(temp.getRightChild()==null)
+				xy=1;
+			else if(((Node<T>)temp.getLeftChild()).getHeight()>((Node<T>)temp.getRightChild()).getHeight())
 			{
-				
+				xy=1;//x is to the left of y
 			}
-			
-			else if(position==2&&p==2)// x->right y && y->right z 
+			else
+				xy=2;//x is to the right of y
+			if(parent.getLeftChild().equals(temp))
 			{
-				
+				yz=1; //y is to the left of z
 			}
-			else if(position==1&&p==2)//x-> left y && y-> right z
+			else
 			{
-				
+				yz=2; //y is to the right of z
 			}
-			else if(position==2&&p==1)//x->right y&& y->left z
-			{
-				
-			}
+			System.out.println("yz="+yz+" xy="+xy);
+			rotate(temp,xy,yz);
 		}
 
 	}
 
+	
+
+	private void rotate(Node<T> temp, int xy, int yz) {
+		if(xy==1&&yz==1)
+			rightRotate(temp);
+		if(xy==2&&yz==2)
+			leftRotate(temp);
+		if(xy==2&&yz==1)
+			leftrightRotate(temp);
+		if(xy==1&&yz==2)
+			rightleftRotate(temp);
+		
+		
+	}
+
+	private void rightleftRotate(Node<T> y) {
+		Node<T> x=(Node<T>)y.getLeftChild();
+		Node<T> t2=(Node<T>)x.getLeftChild();
+		Node<T> t3=(Node<T>)x.getRightChild();
+		Node<T> t4=(Node<T>)y.getRightChild();
+		
+		Node<T> temp= new Node<T>();
+		temp.setLeftChild(t3);
+		temp.setRightChild(t4);
+		temp.setValue(y.getValue());
+		temp.setParent(y);
+		if(t3!=null)t3.setParent(temp);
+		if(t4!=null)t4.setParent(temp);
+		
+		y.setRightChild(temp);
+		y.setValue(x.getValue());
+		y.setLeftChild(t2);
+		if(t2!=null)t2.setParent(y);
+		leftRotate(y);
+
+	}
+
+	private void leftrightRotate(Node<T> y) {
+		Node<T> x=(Node<T>)y.getRightChild();
+		Node<T> t1=(Node<T>)y.getLeftChild();
+		Node<T> t2=(Node<T>)x.getLeftChild();
+		Node<T> t3=(Node<T>)x.getRightChild();
+		
+		Node<T> temp= new Node<T>();
+		temp.setLeftChild(t1);
+		temp.setRightChild(t2);
+		temp.setValue(y.getValue());
+		temp.setParent(y);
+		if(t1!=null)t1.setParent(temp);
+		if(t2!=null)t2.setParent(temp);
+		
+		y.setLeftChild(temp);
+		y.setValue(x.getValue());
+		y.setRightChild(t3);
+		if(t3!=null)t3.setParent(y);
+		
+		rightRotate(y);
+		
+	}
+
+	private void rightRotate(Node<T> y) {
+		Node<T> z= y.getParent();
+		Node<T> x=(Node<T>)y.getLeftChild();
+		
+		
+		Node<T> t1=(Node<T>)x.getLeftChild();
+		Node<T> t2=(Node<T>)x.getRightChild();
+		Node<T> t3=(Node<T>)y.getRightChild();
+		Node<T> t4=(Node<T>)z.getRightChild();
+		
+		Node<T> temp= new Node<T>();
+		temp.setRightChild(t4);
+		temp.setLeftChild(t3);
+		if(t4!=null)t4.setParent(temp);
+		if(t3!=null)t3.setParent(temp);
+		temp.setParent(z);
+		z.setRightChild(temp);
+		
+		temp.setValue(z.getValue());
+		z.setValue(y.getValue());
+		y.setValue(x.getValue());
+		y.setLeftChild(t1);
+		y.setRightChild(t2);
+		if(t1!=null)t1.setParent(y);
+		if(t2!=null)t2.setParent(y);
+		
+		y.setHeight(getmaxheight(t3,t4)+1);
+		temp.setHeight(getmaxheight(t1, t2)+1);
+		int zheight=z.getHeight();
+		z.setHeight(getmaxheight(y, temp));
+		int difference=z.getHeight()-zheight;
+		Node<T> parent=z.getParent();
+		while(parent!=null)
+		{
+			parent.setHeight(parent.getHeight()+difference);
+			parent=parent.getParent();
+		}
+		
+	}
+	
+	
+	private void leftRotate(Node<T> y) {
+		Node<T> z= y.getParent();
+		Node<T> x=(Node<T>)y.getRightChild();
+		
+		
+		Node<T> t1=(Node<T>)z.getLeftChild();
+		Node<T> t2=(Node<T>)y.getLeftChild();
+		Node<T> t3=(Node<T>)x.getLeftChild();
+		Node<T> t4=(Node<T>)x.getRightChild();
+		
+		Node<T> temp= new Node<T>();
+		
+		temp.setValue(z.getValue());
+		temp.setLeftChild(t1);
+		temp.setRightChild(t2);
+		if(t1!=null) t1.setParent(temp);
+		if(t2!=null) t2.setParent(temp);
+		z.setLeftChild(temp);
+		
+		z.setValue(y.getValue());
+		y.setValue(x.getValue());
+		y.setLeftChild(t3);
+		y.setRightChild(t4);
+		if(t3!=null)t3.setParent(y);
+		if(t4!=null)t4.setParent(y);
+		
+		y.setHeight(getmaxheight(t1,t2)+1);
+		temp.setHeight(getmaxheight(t3, t4)+1);
+		int zheight=z.getHeight();
+		z.setHeight(getmaxheight(y, temp));
+		int difference=z.getHeight()-zheight;
+		Node<T> parent=z.getParent();
+		while(parent!=null)
+		{
+			parent.setHeight(parent.getHeight()+difference);
+			parent=parent.getParent();
+		}
+		
+		
+		
+	}
+	private int getmaxheight(Node<T> t1, Node<T> t2) {
+		if(t1==null)
+			return t2.getHeight();
+		if(t2==null)
+			return t1.getHeight();
+		if(t1.getHeight()>t2.getHeight())
+			return t1.getHeight();
+		else
+			return t2.getHeight();
+		
+	}
+
 	private boolean checkbalance(Node<T> parent) {
-		// TODO Auto-generated method stub
 		if (parent == null)
 			return true;//reached the root and balanced
-		int l = parent.getleft().getHeight();
-		int r = parent.getright().getHeight();
+		int l=0,r=0;
+		Node<T> left=(Node<T>)parent.getLeftChild();
+		Node<T> right=(Node<T>)parent.getRightChild();
+		
+		if(left!=null)
+			l=left.getHeight();
+		if(right!=null)
+			r=right.getHeight();
+		
 		if (Math.abs(l-r)>1)//the left is unbalanced
-			return false;
+			{
+				//System.out.println(parent.getValue()+"   "+l+" "+r);
+			//System.out.println(((Node<Integer>)root.getLeftChild().getRightChild()).getValue());
+				return false;
+			}
 		return true;//balanced
 
 	}
 
 	@Override
 	public boolean delete(T key) {
-		// TODO Auto-generated method stub
-		return false;
+	return false;
 	}
 
 	@Override
 	public boolean search(T key) {
-		// TODO Auto-generated method stub
-
+		Node<T> temp=root;
+		while(temp!=null)
+		{
+			if(temp.getValue()==key)
+				return true;
+			if(temp.getValue().compareTo(key)>0)
+				temp=(Node<T>)temp.getLeftChild();
+			else
+				temp=(Node<T>)temp.getRightChild();
+		}
 		return false;
-	}
+		}
 
 	@Override
 	public int height() {
-		// TODO Auto-generated method stub
+ 
 		/*
 		 * int rcounter = 0; int lcounter = 0; Node temp = root; while
 		 * (temp.getRightChild() != null) { temp = (Node) temp.getRightChild();
@@ -122,42 +308,42 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 
 	@Override
 	public INode<T> getTree() {
-		// TODO Auto-generated method stub
+ 
 		return root;
 	}
 
 	public void print() {
-		System.out.println("In Order ");
+		System.out.println("\nIn Order ");
 		printInorder(root);
 		System.out.println();
-		System.out.println("Pre Order ");
+	/*	System.out.println("Pre Order ");
 		printPreorder(root);
 		System.out.println();
 		System.out.println("Post Order ");
-		printPostorder(root);
+		printPostorder(root);*/
 	}
 
-	public void printPreorder(Node x) {
+	public void printPreorder(Node<T> x) {
 		if (x != null) {
-			printPreorder((Node) x.getLeftChild());
-			System.out.print(x.getValue());
-			printPreorder((Node) x.getLeftChild());
+			printPreorder((Node<T>) x.getLeftChild());
+			System.out.print(x.getValue()+" ");
+			printPreorder((Node<T>) x.getLeftChild());
 		}
 	}
 
-	public void printInorder(Node x) {
+	public void printInorder(Node<T> x) {
 		if (x != null) {
-			System.out.print(x.getValue());
-			printPreorder((Node) x.getLeftChild());
-			printPreorder((Node) x.getRightChild());
+			System.out.print(x.getValue()+"  ");
+			printInorder((Node<T>) x.getLeftChild());
+			printInorder((Node<T>) x.getRightChild());
 		}
 	}
 
-	public void printPostorder(Node x) {
+	public void printPostorder(Node<T> x) {
 		if (x != null) {
-			printPostorder((Node) x.getLeftChild());
-			printPostorder((Node) x.getRightChild());
-			System.out.print(x.getValue());
+			printPostorder((Node<T>) x.getLeftChild());
+			printPostorder((Node<T>) x.getRightChild());
+			System.out.print(x.getValue()+" ");
 
 		}
 	}
