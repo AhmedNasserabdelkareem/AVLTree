@@ -9,7 +9,7 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 	@Override
 	public void insert(T key) {
 		Node<T> temp = new Node<T>();
-		boolean heightflag=false;
+		//boolean heightflag=false;
 		temp.setValue(key);
 		if (root == null) {
 			root = temp;
@@ -24,8 +24,8 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 					if (index == null) {
 						currentParent.setLeftChild(temp);
 						temp.setParent(currentParent);
-						if(currentParent.getRightChild()==null)
-							heightflag=true;
+						/*if(currentParent.getRightChild()==null)
+							heightflag=true;*/
 						break;
 					}
 				} else {
@@ -33,33 +33,36 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 					if (index == null) {
 						currentParent.setRightChild(temp);
 						temp.setParent(currentParent);
-						if(currentParent.getLeftChild()==null)
-							heightflag=true;
+						/*if(currentParent.getLeftChild()==null)
+							heightflag=true;*/
 						break;
 					}
 				}
 			}
 		}
+
 		
-		if(heightflag)
-		{
-			increaseHeight(temp.getParent(),1);
-		}
+		adjustHeight(temp.getParent());
+
 		balance(temp);
+
+		adjustHeight(temp);
+		adjustHeight((Node<T>)temp.getLeftChild());
+		adjustHeight((Node<T>)temp.getRightChild());
+
 		// balance method here
 
 	}
 
-	private void increaseHeight(Node<T> temp, int x) {
-		if(temp!=null)
-		{
-			temp.setHeight(temp.getHeight()+x);
-			//check if we need to increase parent height too
-			increaseHeight(temp.getParent(),x);
+	private void adjustHeight(Node<T> node) {
+		if(node!=null){
+			node.setHeight(getmaxheight((Node<T>)node.getLeftChild(), (Node<T>)node.getRightChild())+1);
+			adjustHeight(node.getParent());
 		}
 		
 	}
 
+	
 	private void balance(Node<T> temp) {
 		if(temp==null)
 			return;
@@ -72,7 +75,6 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		{
 			int yz=0;
 			int xy=0;
-			System.out.println(temp.getValue()+"kjhub");
 			if(temp.getLeftChild()==null)
 				xy=2;
 			else if(temp.getRightChild()==null)
@@ -83,7 +85,7 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 			}
 			else
 				xy=2;//x is to the right of y
-			if(parent.getLeftChild().equals(temp))
+			if(parent.getLeftChild()!=null&&parent.getLeftChild().equals(temp))
 			{
 				yz=1; //y is to the left of z
 			}
@@ -91,7 +93,7 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 			{
 				yz=2; //y is to the right of z
 			}
-			System.out.println("yz="+yz+" xy="+xy);
+			//System.out.println("yz="+yz+" xy="+xy);
 			rotate(temp,xy,yz);
 		}
 
@@ -100,6 +102,7 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 	
 
 	private void rotate(Node<T> temp, int xy, int yz) {
+
 		if(xy==1&&yz==1)
 			rightRotate(temp);
 		if(xy==2&&yz==2)
@@ -183,7 +186,7 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		if(t1!=null)t1.setParent(y);
 		if(t2!=null)t2.setParent(y);
 		
-		y.setHeight(getmaxheight(t3,t4)+1);
+		/*y.setHeight(getmaxheight(t3,t4)+1);
 		temp.setHeight(getmaxheight(t1, t2)+1);
 		int zheight=z.getHeight();
 		z.setHeight(getmaxheight(y, temp));
@@ -193,12 +196,13 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		{
 			parent.setHeight(parent.getHeight()+difference);
 			parent=parent.getParent();
-		}
+		}*/
 		
 	}
 	
 	
 	private void leftRotate(Node<T> y) {
+		
 		Node<T> z= y.getParent();
 		Node<T> x=(Node<T>)y.getRightChild();
 		
@@ -207,7 +211,7 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		Node<T> t2=(Node<T>)y.getLeftChild();
 		Node<T> t3=(Node<T>)x.getLeftChild();
 		Node<T> t4=(Node<T>)x.getRightChild();
-		
+		//System.out.println();
 		Node<T> temp= new Node<T>();
 		
 		temp.setValue(z.getValue());
@@ -223,8 +227,8 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		y.setRightChild(t4);
 		if(t3!=null)t3.setParent(y);
 		if(t4!=null)t4.setParent(y);
-		
-		y.setHeight(getmaxheight(t1,t2)+1);
+		//print();
+		/*y.setHeight(getmaxheight(t1,t2)+1);
 		temp.setHeight(getmaxheight(t3, t4)+1);
 		int zheight=z.getHeight();
 		z.setHeight(getmaxheight(y, temp));
@@ -234,12 +238,14 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		{
 			parent.setHeight(parent.getHeight()+difference);
 			parent=parent.getParent();
-		}
+		}*/
 		
 		
 		
 	}
 	private int getmaxheight(Node<T> t1, Node<T> t2) {
+		if(t1==null&&t2==null)
+			return -1;
 		if(t1==null)
 			return t2.getHeight();
 		if(t2==null)
@@ -259,9 +265,9 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		Node<T> right=(Node<T>)parent.getRightChild();
 		
 		if(left!=null)
-			l=left.getHeight();
+			l=left.getHeight()+1;
 		if(right!=null)
-			r=right.getHeight();
+			r=right.getHeight()+1;
 		
 		if (Math.abs(l-r)>1)//the left is unbalanced
 			{
@@ -321,6 +327,7 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		System.out.println();
 		System.out.println("Post Order ");
 		printPostorder(root);*/
+		
 	}
 
 	public void printPreorder(Node<T> x) {
