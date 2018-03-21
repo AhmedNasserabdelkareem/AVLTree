@@ -330,6 +330,7 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		
 	}
 
+	
 	public void printPreorder(Node<T> x) {
 		if (x != null) {
 			printPreorder((Node<T>) x.getLeftChild());
