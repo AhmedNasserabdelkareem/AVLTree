@@ -1,6 +1,8 @@
 package eg.edu.alexu.csd.filestructure.avl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,7 +13,6 @@ import eg.edu.alexu.csd.filestructure.avl.IDictionary;
 import eg.edu.alexu.csd.filestructure.avl.INode;
 import eg.edu.alexu.csd.filestructure.avl.cs09.MyAVL;
 import eg.edu.alexu.csd.filestructure.avl.cs09.MyDictionary;
-import junit.textui.TestRunner;
 
 public class AVLTests {
 	static AVLUtil<Integer> validator = new AVLUtil<Integer>();
