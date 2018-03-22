@@ -19,7 +19,7 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 			Node<T> currentParent;
 			while (true) {
 				currentParent = index;
-				if ((int) key < (int) index.getValue()) {
+				if ( key.compareTo(index.getValue())==-1 ) {
 					index = (Node<T>) index.getLeftChild();
 					if (index == null) {
 						currentParent.setLeftChild(temp);
