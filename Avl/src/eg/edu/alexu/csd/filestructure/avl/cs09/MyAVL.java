@@ -5,14 +5,17 @@ import eg.edu.alexu.csd.filestructure.avl.INode;
 
 public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 	public Node<T> root;
+	private int size=0;
 
 	@Override
 	public void insert(T key) {
+		if (!search(key)) {
 		Node<T> temp = new Node<T>();
 		//boolean heightflag=false;
 		temp.setValue(key);
 		if (root == null) {
 			root = temp;
+			size++;
 			return;
 		} else {
 			Node<T> index = root;
@@ -49,7 +52,8 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		adjustHeight(temp);
 		adjustHeight((Node<T>)temp.getLeftChild());
 		adjustHeight((Node<T>)temp.getRightChild());
-
+		size++;
+		}
 		// balance method here
 
 	}
@@ -264,7 +268,13 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 
 	@Override
 	public boolean delete(T key) {
-	return false;
+		if (search(key)) {
+			searchNode(key);			
+			//balance(temp.getParent());
+			return true;
+		}else {
+			return false;
+		}
 	}
 
 	@Override
@@ -282,16 +292,22 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		return false;
 		}
 
+	public Node searchNode(T key) {
+		Node<T> temp=root;
+		while(temp!=null)
+		{
+			if(temp.getValue()==key) {				
+				return temp;
+		}
+			if(temp.getValue().compareTo(key)>0)
+				temp=(Node<T>)temp.getLeftChild();
+			else
+				temp=(Node<T>)temp.getRightChild();
+		}
+		return null;
+		}
 	@Override
 	public int height() {
- 
-		/*
-		 * int rcounter = 0; int lcounter = 0; Node temp = root; while
-		 * (temp.getRightChild() != null) { temp = (Node) temp.getRightChild();
-		 * rcounter++; } while (temp.getLeftChild() != null) { temp = (Node)
-		 * temp.getLeftChild(); lcounter++; } if (rcounter>lcounter) { return
-		 * rcounter+1; }else { return lcounter+1; }
-		 */
 		return root.getHeight()+1;
 	}
 
@@ -302,26 +318,12 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 	}
 
 	public void print() {
-		System.out.println("\nIn Order ");
+
 		printInorder(root);
 		System.out.println();
-	/*	System.out.println("Pre Order ");
-		printPreorder(root);
-		System.out.println();
-		System.out.println("Post Order ");
-		printPostorder(root);*/
-		
 	}
 
 	
-	public void printPreorder(Node<T> x) {
-		if (x != null) {
-			printPreorder((Node<T>) x.getLeftChild());
-			System.out.print(x.getValue()+" ");
-			printPreorder((Node<T>) x.getLeftChild());
-		}
-	}
-
 	public void printInorder(Node<T> x) {
 		if (x != null) {
 			System.out.print(x.getValue()+"  ");
@@ -330,14 +332,6 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		}
 	}
 
-	public void printPostorder(Node<T> x) {
-		if (x != null) {
-			printPostorder((Node<T>) x.getLeftChild());
-			printPostorder((Node<T>) x.getRightChild());
-			System.out.print(x.getValue()+" ");
-
-		}
-	}
 	private int checkBalanceAux(INode<T> node) {
 		if (node == null)
 			return 0;
@@ -350,5 +344,83 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		}
 		return 1 + Math.max(left, right);
 	}
+	/* public Node deleteNode(Node root, T key)
+	    {
+	        if (root == null)
+	            return root;
+	        if (key.compareTo((T) root.getValue()) == -1)
+	            root.setLeftChild(deleteNode((Node) root.getLeftChild(), key));
+	        else if (key.compareTo((T) root.getValue()) == 1)
+				root.setRightChild(deleteNode((Node) root.getRightChild(), key));
+	        else
+	        {
+	 
+	            if ((root.getLeftChild()== null) || (root.getRightChild() == null))
+	            {
+	                Node temp = null;
+	                if (temp == root.getLeftChild())
+	                    temp = (Node) root.getRightChild();
+	                else
+	                    temp = (Node) root.getLeftChild();	 
+	                if (temp == null)
+	                {
+	                    temp = root;
+	                    root = null;
+	                }
+	                else   
+	                    root = temp; 
+	            }
+	            else
+	            {
+	                Node temp = minValueNode((Node) root.getRightChild());	 
+	                root.setValue(temp.getValue());	 
+	                root.setRightChild(deleteNode((Node) root.getRightChild(), (T) temp.getValue()));
+	            }
+	        }	 
+	        if (root == null)
+	            return root;	 
+	        root.setHeight(Math.max(((Node) root.getLeftChild()).getHeight(),((Node) root.getRightChild()).getHeight()) + 1);
+	 
+	        // STEP 3: GET THE BALANCE FACTOR OF THIS NODE (to check whether
+	        //  this node became unbalanced)
+	        boolean balance = checkbalance(root);
+	 
+	        // Left Left Case
+	        if (balance  && calculateBalance((Node) root.getLeftChild()) >= 0)
+	            rightRotate(root);
+	 
+	        // Left Right Case
+	        if (balance && calculateBalance((Node) root.getLeftChild()) < 0)
+	        {
+	            leftrightRotate(root);
+	        }
+	 
+	        // Right Right Case
+	        if (balance && calculateBalance((Node) root.getRightChild()) <= 0)
+	            leftRotate(root);
+	 
+	        // Right Left Case
+	        if (balance  && calculateBalance((Node) root.getRightChild()) > 0)
+	        {
+	            rightleftRotate(root);
+	        }
+	 
+	        return root;
+	    }
+	   private  Node minValueNode(Node node) {
+	        Node current = node;	 
+	        while (current.getLeftChild() != null)
+	           current = (Node) current.getLeftChild();
+	        return current;
+	    }
+	   private int calculateBalance (Node node) {
+		   if (node == null)
+			   return 0;
+		   return ((Node<T>) node.getLeftChild()).getHeight()-((Node<T>) node.getRightChild()).getHeight();
+	   }*/
 
+	public int getSize() {
+		// TODO Auto-generated method stub
+		return size;
+	}
 }

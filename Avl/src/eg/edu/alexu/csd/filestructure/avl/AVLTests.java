@@ -32,7 +32,7 @@ public class AVLTests {
 		System.out.println("\nSmoke Tests:\n");
 		testSearchSmoke();
 		System.out.println("6- testSearchSmoke passed");
-		testHeight();
+	    testHeight();
 		System.out.println("7- testHeight passed");
 		//Test dictionary
 		System.out.println("\nDictionary Tests:\n");
@@ -64,7 +64,6 @@ public class AVLTests {
 		IAVLTree<Integer> avl = new MyAVL<Integer>();
 		for (int i = 1; i < 1000; ++i)
 			avl.insert(i);
-		System.out.println(avl.getTree());
 
 		assertTrue(validator.validateAVL(avl.getTree()));
 	}
@@ -143,7 +142,7 @@ public class AVLTests {
 	@org.junit.Test(timeout = 7000)
 	public static void testLoad() {
 		IDictionary dict = new MyDictionary();
-		File input = new File("src//eg//edu//alexu//csd//filestructure//avl//cs28//res//dictionary.txt");
+		File input = new File("src//eg//edu//alexu//csd//filestructure//avl//res//dictionary.txt");
 		dict.load(input);
 		assertEquals(9123, dict.size()); // out of the 10,000 input words, there
 											// are only 9123 unique words
@@ -153,9 +152,9 @@ public class AVLTests {
 	@org.junit.Test(timeout = 10000)
 	public static void testLookup() throws FileNotFoundException {
 		IDictionary dict = new MyDictionary();
-		File dictFile = new File("src//eg//edu//alexu//csd//filestructure//avl//cs28//res//dictionary.txt");
+		File dictFile = new File("src//eg//edu//alexu//csd//filestructure//avl//res//dictionary.txt");
 		dict.load(dictFile);
-		File inputFile = new File("src//eg//edu//alexu//csd//filestructure//avl//cs28//res//queries.txt");
+		File inputFile = new File("src//eg//edu//alexu//csd//filestructure//avl//res//queries.txt");
 		Scanner sc = new Scanner(inputFile);
 		// there are 15 queries. the first 10 exist, and the remaining 5 don't
 		for (int i = 0; i < 10; ++i)
@@ -168,9 +167,9 @@ public class AVLTests {
 	@org.junit.Test(timeout = 7000)
 	public static void testDeleteFromDictionary() throws FileNotFoundException {
 		IDictionary dict = new MyDictionary();
-		File dictFile = new File("src//eg//edu//alexu//csd//filestructure//avl//cs28//res//dictionary.txt");
+		File dictFile = new File("src//eg//edu//alexu//csd//filestructure//avl//res//dictionary.txt");
 		dict.load(dictFile);
-		File inputFile = new File("src//eg//edu//alexu//csd//filestructure//avl//cs28//res//deletions.txt");
+		File inputFile = new File("src//eg//edu//alexu//csd//filestructure//avl//res//deletions.txt");
 		Scanner sc = new Scanner(inputFile);
 		// there are 300 words to delete, but only 290 unique words in them
 		while (sc.hasNext())
