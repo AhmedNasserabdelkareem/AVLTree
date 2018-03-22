@@ -95,6 +95,7 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 			}
 			//System.out.println("yz="+yz+" xy="+xy);
 			rotate(temp,xy,yz);
+
 		}
 
 	}
@@ -258,25 +259,7 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 	}
 
 	private boolean checkbalance(Node<T> parent) {
-		if (parent == null)
-			return true;//reached the root and balanced
-		int l=0,r=0;
-		Node<T> left=(Node<T>)parent.getLeftChild();
-		Node<T> right=(Node<T>)parent.getRightChild();
-		
-		if(left!=null)
-			l=left.getHeight()+1;
-		if(right!=null)
-			r=right.getHeight()+1;
-		
-		if (Math.abs(l-r)>1)//the left is unbalanced
-			{
-				//System.out.println(parent.getValue()+"   "+l+" "+r);
-			//System.out.println(((Node<Integer>)root.getLeftChild().getRightChild()).getValue());
-				return false;
-			}
-		return true;//balanced
-
+		return checkBalanceAux(parent) != -1;
 	}
 
 	@Override
@@ -309,7 +292,7 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		 * temp.getLeftChild(); lcounter++; } if (rcounter>lcounter) { return
 		 * rcounter+1; }else { return lcounter+1; }
 		 */
-		return root.getHeight();
+		return root.getHeight()+1;
 	}
 
 	@Override
@@ -354,6 +337,18 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 			System.out.print(x.getValue()+" ");
 
 		}
+	}
+	private int checkBalanceAux(INode<T> node) {
+		if (node == null)
+			return 0;
+		int left = checkBalanceAux(node.getLeftChild());
+		int right = checkBalanceAux(node.getRightChild());
+		if (left == -1 || right == -1)
+			return -1;
+		if (Math.abs(left - right) > 1) {
+			return -1;
+		}
+		return 1 + Math.max(left, right);
 	}
 
 }
