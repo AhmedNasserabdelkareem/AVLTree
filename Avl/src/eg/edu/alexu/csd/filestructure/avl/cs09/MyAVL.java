@@ -231,23 +231,9 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		y.setLeftChild(t3);
 		y.setRightChild(t4);
 		if(t3!=null)t3.setParent(y);
-		if(t4!=null)t4.setParent(y);
-		//print();
-		/*y.setHeight(getmaxheight(t1,t2)+1);
-		temp.setHeight(getmaxheight(t3, t4)+1);
-		int zheight=z.getHeight();
-		z.setHeight(getmaxheight(y, temp));
-		int difference=z.getHeight()-zheight;
-		Node<T> parent=z.getParent();
-		while(parent!=null)
-		{
-			parent.setHeight(parent.getHeight()+difference);
-			parent=parent.getParent();
-		}*/
-		
-		
-		
+		if(t4!=null)t4.setParent(y);		
 	}
+
 	private int getmaxheight(Node<T> t1, Node<T> t2) {
 		if(t1==null&&t2==null)
 			return -1;
@@ -269,14 +255,25 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 	@Override
 	public boolean delete(T key) {
 		if (search(key)) {
-			searchNode(key);			
-			//balance(temp.getParent());
+	        root = (Node<T>) deleteNode(root, key);
 			return true;
 		}else {
 			return false;
 		}
 	}
-
+    int getBalance(Node node) {
+        if (node == null)
+            return 0;
+        int l = 0;
+        int r = 0;
+        if (node.getLeftChild() != null) {
+            l = ((Node) (node.getLeftChild())).getHeight() + 1;
+        }
+        if (node.getRightChild() != null) {
+            r = ((Node) (node.getRightChild())).getHeight() + 1;
+        }
+        return l - r;
+    }
 	@Override
 	public boolean search(T key) {
 		Node<T> temp=root;
@@ -344,68 +341,45 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		}
 		return 1 + Math.max(left, right);
 	}
-	/* public Node deleteNode(Node root, T key)
-	    {
-	        if (root == null)
-	            return root;
-	        if (key.compareTo((T) root.getValue()) == -1)
-	            root.setLeftChild(deleteNode((Node) root.getLeftChild(), key));
-	        else if (key.compareTo((T) root.getValue()) == 1)
-				root.setRightChild(deleteNode((Node) root.getRightChild(), key));
-	        else
-	        {
-	 
-	            if ((root.getLeftChild()== null) || (root.getRightChild() == null))
-	            {
-	                Node temp = null;
-	                if (temp == root.getLeftChild())
-	                    temp = (Node) root.getRightChild();
-	                else
-	                    temp = (Node) root.getLeftChild();	 
-	                if (temp == null)
-	                {
-	                    temp = root;
-	                    root = null;
-	                }
-	                else   
-	                    root = temp; 
-	            }
-	            else
-	            {
-	                Node temp = minValueNode((Node) root.getRightChild());	 
-	                root.setValue(temp.getValue());	 
-	                root.setRightChild(deleteNode((Node) root.getRightChild(), (T) temp.getValue()));
-	            }
-	        }	 
-	        if (root == null)
-	            return root;	 
-	        root.setHeight(Math.max(((Node) root.getLeftChild()).getHeight(),((Node) root.getRightChild()).getHeight()) + 1);
-	 
-	        // STEP 3: GET THE BALANCE FACTOR OF THIS NODE (to check whether
-	        //  this node became unbalanced)
-	        boolean balance = checkbalance(root);
-	 
-	        // Left Left Case
-	        if (balance  && calculateBalance((Node) root.getLeftChild()) >= 0)
-	            rightRotate(root);
-	 
-	        // Left Right Case
-	        if (balance && calculateBalance((Node) root.getLeftChild()) < 0)
-	        {
-	            leftrightRotate(root);
+	
+
+
+
+	public int getSize() {
+		// TODO Auto-generated method stub
+		return size;
+	}
+	 private Node balanceDeletion(Node node) {
+
+	        int leftH = -1;
+	        int rightH = -1;
+	        if (node.getLeftChild() != null) {
+	            leftH = ((Node) (node.getLeftChild())).getHeight();
 	        }
-	 
-	        // Right Right Case
-	        if (balance && calculateBalance((Node) root.getRightChild()) <= 0)
-	            leftRotate(root);
-	 
-	        // Right Left Case
-	        if (balance  && calculateBalance((Node) root.getRightChild()) > 0)
-	        {
-	            rightleftRotate(root);
+	        if (node.getRightChild() != null) {
+	            rightH = ((Node) (node.getRightChild())).getHeight();
 	        }
-	 
-	        return root;
+	        int balance = leftH - rightH;
+
+	        if (balance < -1
+	                && getBalance((Node) node.getRightChild()) <= 0) {
+	            return rotateLeft(node);
+
+	        } else if (balance < -1
+	                && getBalance((Node) node.getRightChild()) > 0) {
+	            node.setRightChild(rotateRight((Node) node.getRightChild()));
+	            return rotateLeft(node);
+
+	        } else if (balance > 1
+	                && getBalance((Node) node.getLeftChild()) < 0) {
+	            node.setLeftChild(rotateLeft((Node) node.getLeftChild()));
+	            return rotateRight(node);
+
+	        } else if (balance > 1
+	                && getBalance((Node) node.getLeftChild()) >= 0) {
+	            return rotateRight(node);
+	        }
+	        return null;
 	    }
 	   private  Node minValueNode(Node node) {
 	        Node current = node;	 
@@ -417,10 +391,71 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		   if (node == null)
 			   return 0;
 		   return ((Node<T>) node.getLeftChild()).getHeight()-((Node<T>) node.getRightChild()).getHeight();
-	   }*/
+	   }
+	private Node rotateRight(Node node) {
+        Node x = (Node) node.getLeftChild();
+        Node t = (Node) x.getRightChild();
 
-	public int getSize() {
-		// TODO Auto-generated method stub
-		return size;
-	}
+        node.setLeftChild(t);
+        x.setRightChild(node);
+
+        node.setHeight(MaxHeight(node) + 1);
+        x.setHeight(MaxHeight(x) + 1);
+        return x;
+    }
+
+    private Node rotateLeft(Node node) {
+        Node x = (Node) node.getRightChild();
+        Node t = (Node) x.getLeftChild();
+
+        node.setRightChild(t);
+        x.setLeftChild(node);
+
+        node.setHeight(MaxHeight(node) + 1);
+        x.setHeight(MaxHeight(x) + 1);
+
+        return x;
+    }
+	 private Node deleteNode(Node node, Comparable key) {
+	        if (node == null) {
+	            return node;
+	        } else if (node.getValue().compareTo(key) > 0) {
+	            node.setLeftChild(deleteNode((Node) node.getLeftChild(), key));
+	        } else if (node.getValue().compareTo(key) < 0) {
+	            node.setRightChild(deleteNode((Node) node.getRightChild(), key));
+	        } else {
+	            if (node.getLeftChild() == null && node.getRightChild() == null) {
+	                node = null;
+	                return node;
+	            } else if (node.getLeftChild() == null) {
+	                node = (Node) node.getRightChild();
+	                return node;
+	            } else if (node.getRightChild() == null) {
+	                node = (Node) node.getLeftChild();
+	                return node;
+	            } else {
+	                Node temp = minValueNode((Node) node.getRightChild());
+	                node.setValue(temp.getValue());
+	                node.setRightChild(deleteNode((Node) node.getRightChild(),
+	                        temp.getValue()));
+	            }
+	        }
+	        node.setHeight(MaxHeight(node) + 1);
+	        Node temp = balanceDeletion(node);
+	        if (temp != null) {
+	            node = temp;
+	        }
+	        return node;
+	    }
+	    private int MaxHeight(Node node) {
+	        int left = -1;
+	        int right = -1;
+	        if (node.getLeftChild() != null) {
+	            left = ((Node) (node.getLeftChild())).getHeight();
+	        }
+	        if (node.getRightChild() != null) {
+	            right = ((Node) (node.getRightChild())).getHeight();
+	        }
+	        return Math.max(left, right);
+	    }
 }
