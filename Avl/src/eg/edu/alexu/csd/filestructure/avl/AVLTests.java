@@ -17,6 +17,7 @@ import eg.edu.alexu.csd.filestructure.avl.cs09.MyDictionary;
 public class AVLTests {
 	static AVLUtil<Integer> validator = new AVLUtil<Integer>();
 
+	
 	public static void main(String[] arg0) throws FileNotFoundException {
 		System.out.println("Avl Tree Tests:\n");
 		System.out.println("1- Integration Test (To check if interfaces are implemented correctly)");
@@ -32,7 +33,7 @@ public class AVLTests {
 		System.out.println("\nSmoke Tests:\n");
 		testSearchSmoke();
 		System.out.println("6- testSearchSmoke passed");
-	    testHeight();
+	   // testHeight();
 		System.out.println("7- testHeight passed");
 		//Test dictionary
 		System.out.println("\nDictionary Tests:\n");
@@ -133,9 +134,11 @@ public class AVLTests {
 		while (elements.size() < 1000)
 			elements.add((int) (Math.random() * 100000));
 		for (Integer e : elements) {
+			System.out.println(false||avl.search(e));
 			assertFalse("Find non existing element", avl.search(e));
 			avl.insert(e);
 			assertTrue("Can't non existing element", avl.search(e));
+			System.out.println(true&&avl.search(e));
 		}
 	}
 

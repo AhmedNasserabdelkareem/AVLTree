@@ -280,7 +280,7 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		Node<T> temp=root;
 		while(temp!=null)
 		{
-			if(temp.getValue()==key)
+			if(temp.getValue().compareTo(key)==0)
 				return true;
 			if(temp.getValue().compareTo(key)>0)
 				temp=(Node<T>)temp.getLeftChild();
@@ -306,6 +306,9 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 		}
 	@Override
 	public int height() {
+		if (root==null){
+			return 0;
+		}
 		return root.getHeight()+1;
 	}
 
@@ -352,15 +355,15 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 	}
 	 private Node balanceDeletion(Node node) {
 
-	        int leftH = -1;
-	        int rightH = -1;
+	        int l = -1;
+	        int r = -1;
 	        if (node.getLeftChild() != null) {
-	            leftH = ((Node) (node.getLeftChild())).getHeight();
+	            l = ((Node) (node.getLeftChild())).getHeight();
 	        }
 	        if (node.getRightChild() != null) {
-	            rightH = ((Node) (node.getRightChild())).getHeight();
+	            r = ((Node) (node.getRightChild())).getHeight();
 	        }
-	        int balance = leftH - rightH;
+	        int balance = l - r;
 
 	        if (balance < -1
 	                && getBalance((Node) node.getRightChild()) <= 0) {
@@ -449,14 +452,14 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 	        return node;
 	    }
 	    private int MaxHeight(Node node) {
-	        int left = -1;
-	        int right = -1;
+	        int l = -1;
+	        int r = -1;
 	        if (node.getLeftChild() != null) {
-	            left = ((Node) (node.getLeftChild())).getHeight();
+	            l = ((Node) (node.getLeftChild())).getHeight();
 	        }
 	        if (node.getRightChild() != null) {
-	            right = ((Node) (node.getRightChild())).getHeight();
+	            r = ((Node) (node.getRightChild())).getHeight();
 	        }
-	        return Math.max(left, right);
+	        return Math.max(l, r);
 	    }
 }
