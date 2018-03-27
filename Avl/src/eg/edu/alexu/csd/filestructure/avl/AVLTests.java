@@ -134,11 +134,11 @@ public class AVLTests {
 		while (elements.size() < 1000)
 			elements.add((int) (Math.random() * 100000));
 		for (Integer e : elements) {
-			System.out.println(false||avl.search(e));
+		//	System.out.println(false||avl.search(e));
 			assertFalse("Find non existing element", avl.search(e));
 			avl.insert(e);
 			assertTrue("Can't non existing element", avl.search(e));
-			System.out.println(true&&avl.search(e));
+		//	System.out.println(true&&avl.search(e));
 		}
 	}
 
