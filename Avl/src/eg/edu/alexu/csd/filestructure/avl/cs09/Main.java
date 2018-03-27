@@ -12,8 +12,8 @@ public class Main {
 
 		for (int i = 0; i < input.length; ++i){
 			x.insert(input[i]);
-			System.out.println(i+1);
-			x.print();
+			System.out.println(x.getSize());
+			//x.print();
 		}
 		// try deleting non-existing elements
 		for (int i = -1; i >= -5; --i) {
@@ -24,7 +24,8 @@ public class Main {
 		int[] deleteOrder = { 8, 4, 2, 12, 9, 13, 5, 3, 1, 6 };
 		for (int element : deleteOrder) {
 			assertTrue(x.delete(element));
-			x.print();
+			System.out.println(x.getSize());
+			//x.print();
 		}
 		
 

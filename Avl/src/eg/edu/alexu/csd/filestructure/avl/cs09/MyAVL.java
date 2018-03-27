@@ -256,6 +256,7 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 	public boolean delete(T key) {
 		if (search(key)) {
 	        root = (Node<T>) deleteNode(root, key);
+	        size--;
 			return true;
 		}else {
 			return false;
