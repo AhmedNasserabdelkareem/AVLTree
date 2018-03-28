@@ -46,9 +46,8 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 
 		
 		adjustHeight(temp.getParent());
-
 		balance(temp);
-
+		
 		adjustHeight(temp);
 		adjustHeight((Node<T>)temp.getLeftChild());
 		adjustHeight((Node<T>)temp.getRightChild());
@@ -144,6 +143,11 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 
 	private void leftrightRotate(Node<T> y) {
 		Node<T> x=(Node<T>)y.getRightChild();
+		
+		if(x==null)
+			return;
+		
+		
 		Node<T> t1=(Node<T>)y.getLeftChild();
 		Node<T> t2=(Node<T>)x.getLeftChild();
 		Node<T> t3=(Node<T>)x.getRightChild();
@@ -208,9 +212,11 @@ public class MyAVL<T extends Comparable<T>> implements IAVLTree<T> {
 	
 	private void leftRotate(Node<T> y) {
 		
+		
 		Node<T> z= y.getParent();
 		Node<T> x=(Node<T>)y.getRightChild();
-		
+		if(x==null)
+			return;
 		
 		Node<T> t1=(Node<T>)z.getLeftChild();
 		Node<T> t2=(Node<T>)y.getLeftChild();

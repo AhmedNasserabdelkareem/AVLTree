@@ -67,15 +67,6 @@ public class Node<T extends Comparable<T>> implements INode<T> {
 	public void setParent(Node<T> parent) {
 		this.parent = parent;
 	}
-	/*public Node<T> getleft()
-	{
-		return left;
-	}
-	public Node<T> getright()
-	{
-		return right;
-	}*/
-
 	public int getLeftIndex() {
 		return (index * 2) + 1;
 	}

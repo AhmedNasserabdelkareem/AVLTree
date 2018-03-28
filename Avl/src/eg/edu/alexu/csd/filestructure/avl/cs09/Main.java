@@ -1,65 +1,1227 @@
 package eg.edu.alexu.csd.filestructure.avl.cs09;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Scanner;
+import java.util.Set;
+
+import eg.edu.alexu.csd.filestructure.avl.IAVLTree;
+import eg.edu.alexu.csd.filestructure.avl.IDictionary;
+import eg.edu.alexu.csd.filestructure.avl.INode;
+import junit.textui.TestRunner;
 
 public class Main {
+	static AVLUtil<Integer> validator = new AVLUtil<Integer>();
 
-	public static void main(String[] args) {
-		MyAVL avl = new MyAVL();
-		System.out.println(avl.height());
-		//assertEquals("Invalid height", 0, avl.height());
-		avl.insert(123);
-		System.out.println(avl.height());
-
-		//assertEquals("Invalid height", 1, avl.height());
-		avl.insert(456);
-		System.out.println(avl.height());
-
-		//assertEquals("Invalid height", 2, avl.height());
-		avl.delete(456);
-		System.out.println(avl.height());
-
-		//assertEquals("Invalid height", 1, avl.height());
-		avl.delete(123);
-		System.out.println(avl.height());
-
-		//assertEquals("Invalid height", 0, avl.height());
-		for (int i = 0; i < 1000; i++){
-			avl.insert(55);
-		}
-		System.out.println(avl.height());
-
-		//assertTrue("Invalid height after adding duplicates", avl.height() > 1);
-//		int[] input = { 13, 8, 5, 9, 4, 6, 12, 2, 1, 3 };
-//
-//		for (int i = 0; i < input.length; ++i){
-//			x.insert(input[i]);
-//			System.out.println(x.getSize());
-//			//x.print();
-//		}
-//		// try deleting non-existing elements
-//		for (int i = -1; i >= -5; --i) {
-//			assertFalse(x.delete(i));
-//		}
-//		// check that the tree structure is not affected
-//		// delete all existing elements
-//		int[] deleteOrder = { 8, 4, 2, 12, 9, 13, 5, 3, 1, 6 };
-//		for (int element : deleteOrder) {
-//			assertTrue(x.delete(element));
-//			System.out.println(x.getSize());
-//			//x.print();
-//		}
-		
-
-		/*	for (int i=10;i>=1;i--){
-			x.insert(i);
-		}
-		x.print();
-		System.out.println(x.height());
-		System.out.println(x.root.getValue());*/
-
+	public static void main(String[] arg0) throws FileNotFoundException {
+		System.out.println("Avl Tree Tests:\n");
+		System.out.println("1- Integration Test (To check if interfaces are implemented correctly)");
+		testInsert();
+		System.out.println("2- testInsert passed");
+		testInsertSkewed();
+		System.out.println("3- testInsertSkewed passed");
+		testSearch();
+		System.out.println("4- testSearch passed");
+		testDelete();
+		System.out.println("5- testDelete passed");
+		// Smoke tests
+		System.out.println("\nSmoke Tests:\n");
+		testSearchSmoke();
+		System.out.println("6- testSearchSmoke passed");
+		testHeight();
+		System.out.println("7- testHeight passed");
+		//Test dictionary
+		System.out.println("\nDictionary Tests:\n");
+		testLoad();
+		System.out.println("8- testLoad passed");
+		testLookup();
+		System.out.println("9- testLookup passed");
+		testDeleteFromDictionary();
+		System.out.println("10- testDeleteFromDictionary passed");
 	}
 
+	@org.junit.Test
+	public static void testInsert() {
+		@SuppressWarnings("unchecked")
+		IAVLTree<Integer> avl = new MyAVL<Integer>();
+		int[] input = { 13, 8, 5, 9, 4, 6, 12, 2, 1, 3 };
+		// int[] height = {0,1,1,2,2,2,2,3,3,3};
+		int[] height = { 1, 2, 2, 3, 3, 3, 3, 4, 4, 4 };
+
+		for (int i = 0; i < input.length; ++i) {
+			avl.insert(input[i]);
+			assertEquals(avl.height(), height[i]);
+		}
+	}
+
+	@org.junit.Test
+	public static void testInsertSkewed() {
+		@SuppressWarnings("unchecked")
+		IAVLTree<Integer> avl = new MyAVL<Integer>();
+		for (int i = 1; i < 1000; ++i)
+			avl.insert(i);
+		assertTrue(validator.validateAVL(avl.getTree()));
+	}
+
+	@org.junit.Test
+	public static void testSearch() {
+		@SuppressWarnings("unchecked")
+		IAVLTree<Integer> avl = new MyAVL<Integer>();
+		int[] input = { 13, 8, 5, 9, 4, 6, 12, 2, 1, 3 };
+		int[] positive = { 8, 12, 3 };
+		int[] negative = { 0, 11, 20 };
+
+		for (int i = 0; i < input.length; ++i) {
+			avl.insert(input[i]);
+		}
+		for (int q : positive)
+			assertTrue(avl.search(q));
+		for (int q : negative)
+			assertFalse(avl.search(q));
+	}
+
+	@org.junit.Test
+	public static void testDelete() {
+		@SuppressWarnings("unchecked")
+		IAVLTree<Integer> avl = new MyAVL<Integer>();
+		int[] input = { 13, 8, 5, 9, 4, 6, 12, 2, 1, 3 };
+
+		for (int i = 0; i < input.length; ++i)
+			avl.insert(input[i]);
+		// try deleting non-existing elements
+		for (int i = -1; i >= -5; --i) {
+			assertFalse(avl.delete(i));
+		}
+		// check that the tree structure is not affected
+		assertTrue(validator.validateAVL(avl.getTree()));
+		// delete all existing elements
+		int[] deleteOrder = { 8, 4, 2, 12, 9, 13, 5, 3, 1, 6 };
+		for (int element : deleteOrder) {
+			assertTrue(avl.delete(element));
+			assertTrue(validator.validateAVL(avl.getTree()));
+		}
+	}
+
+	@org.junit.Test
+	public static void testHeight() {
+		@SuppressWarnings("unchecked")
+		IAVLTree<Integer> avl = new MyAVL<Integer>();
+		assertEquals("Invalid height", 0, avl.height());
+		avl.insert(123);
+		assertEquals("Invalid height", 1, avl.height());
+		avl.insert(456);
+		assertEquals("Invalid height", 2, avl.height());
+		avl.delete(456);
+		assertEquals("Invalid height", 1, avl.height());
+		avl.delete(123);
+		assertEquals("Invalid height", 0, avl.height());
+		for (int i = 0; i < 1000; i++)
+			avl.insert(55);
+		assertTrue("Invalid height after adding duplicates", avl.height() > 1);
+	}
+
+	@org.junit.Test
+	public static void testSearchSmoke() {
+		@SuppressWarnings("unchecked")
+		IAVLTree<Integer> avl = new MyAVL<Integer>();
+		ArrayList<Integer> elements = new ArrayList<Integer>();
+		elements.add(88224);
+		elements.add(6957);
+		elements.add(78103);
+		elements.add(19600);
+		elements.add(97587);
+		elements.add(96024);
+		elements.add(86231);
+		elements.add(19754);
+		elements.add(3399);
+		elements.add(48382);
+		elements.add(37841);
+		elements.add(40193);
+		elements.add(11460);
+		elements.add(36762);
+		elements.add(65474);
+		elements.add(10173);
+		elements.add(22693);
+		elements.add(80736);
+		elements.add(35930);
+		elements.add(82631);
+		elements.add(18384);
+		elements.add(13377);
+		elements.add(79870);
+		elements.add(37581);
+		elements.add(74858);
+		elements.add(16770);
+		elements.add(80346);
+		elements.add(22563);
+		elements.add(28501);
+		elements.add(28818);
+		elements.add(99789);
+		elements.add(15087);
+		elements.add(55099);
+		elements.add(95814);
+		elements.add(32154);
+		elements.add(90541);
+		elements.add(23649);
+		elements.add(95290);
+		elements.add(77125);
+		elements.add(5713);
+		elements.add(34114);
+		elements.add(81924);
+		elements.add(46700);
+		elements.add(62822);
+		elements.add(51053);
+		elements.add(15605);
+		elements.add(30957);
+		elements.add(1921);
+		elements.add(591);
+		elements.add(15244);
+		elements.add(69451);
+		elements.add(80500);
+		elements.add(6915);
+		elements.add(44507);
+		elements.add(97419);
+		elements.add(38352);
+		elements.add(6295);
+		elements.add(76371);
+		elements.add(61879);
+		elements.add(12978);
+		elements.add(91536);
+		elements.add(2261);
+		elements.add(31685);
+		elements.add(66285);
+		elements.add(7897);
+		elements.add(48479);
+		elements.add(57759);
+		elements.add(6800);
+		elements.add(42628);
+		elements.add(37755);
+		elements.add(74939);
+		elements.add(43344);
+		elements.add(24670);
+		elements.add(86962);
+		elements.add(75292);
+		elements.add(85853);
+		elements.add(78437);
+		elements.add(63381);
+		elements.add(24238);
+		elements.add(16953);
+		elements.add(56208);
+		elements.add(31381);
+		elements.add(35432);
+		elements.add(93959);
+		elements.add(7336);
+		elements.add(8976);
+		elements.add(68157);
+		elements.add(5069);
+		elements.add(29292);
+		elements.add(19451);
+		elements.add(61809);
+		elements.add(95877);
+		elements.add(85512);
+		elements.add(67066);
+		elements.add(76091);
+		elements.add(2696);
+		elements.add(68067);
+		elements.add(87869);
+		elements.add(62647);
+		elements.add(77716);
+		elements.add(29401);
+		elements.add(26698);
+		elements.add(54126);
+		elements.add(67713);
+		elements.add(6643);
+		elements.add(69712);
+		elements.add(20052);
+		elements.add(12787);
+		elements.add(14504);
+		elements.add(18114);
+		elements.add(5355);
+		elements.add(64507);
+		elements.add(88282);
+		elements.add(23207);
+		elements.add(37081);
+		elements.add(83913);
+		elements.add(17226);
+		elements.add(15542);
+		elements.add(57532);
+		elements.add(68948);
+		elements.add(20304);
+		elements.add(51602);
+		elements.add(17960);
+		elements.add(78197);
+		elements.add(81379);
+		elements.add(70354);
+		elements.add(45964);
+		elements.add(63216);
+		elements.add(78847);
+		elements.add(98937);
+		elements.add(81858);
+		elements.add(95276);
+		elements.add(15994);
+		elements.add(71880);
+		elements.add(64515);
+		elements.add(73986);
+		elements.add(82637);
+		elements.add(31457);
+		elements.add(35607);
+		elements.add(35075);
+		elements.add(56072);
+		elements.add(58119);
+		elements.add(22630);
+		elements.add(32499);
+		elements.add(79886);
+		elements.add(39445);
+		elements.add(55749);
+		elements.add(56074);
+		elements.add(42927);
+		elements.add(23628);
+		elements.add(71257);
+		elements.add(60030);
+		elements.add(17485);
+		elements.add(19237);
+		elements.add(55303);
+		elements.add(20103);
+		elements.add(5752);
+		elements.add(96857);
+		elements.add(85563);
+		elements.add(7268);
+		elements.add(86608);
+		elements.add(20177);
+		elements.add(35653);
+		elements.add(64683);
+		elements.add(51056);
+		elements.add(84176);
+		elements.add(17335);
+		elements.add(1121);
+		elements.add(63885);
+		elements.add(66303);
+		elements.add(48939);
+		elements.add(68929);
+		elements.add(91605);
+		elements.add(2887);
+		elements.add(54955);
+		elements.add(77467);
+		elements.add(92277);
+		elements.add(87487);
+		elements.add(21335);
+		elements.add(4027);
+		elements.add(71514);
+		elements.add(50464);
+		elements.add(53839);
+		elements.add(3366);
+		elements.add(70795);
+		elements.add(19842);
+		elements.add(12620);
+		elements.add(84308);
+		elements.add(69128);
+		elements.add(82295);
+		elements.add(25234);
+		elements.add(17243);
+		elements.add(47202);
+		elements.add(60128);
+		elements.add(12425);
+		elements.add(59921);
+		elements.add(84334);
+		elements.add(95198);
+		elements.add(96257);
+		elements.add(40563);
+		elements.add(32844);
+		elements.add(83931);
+		elements.add(98544);
+		elements.add(17138);
+		elements.add(41940);
+		elements.add(38965);
+		elements.add(79077);
+		elements.add(39516);
+		elements.add(83741);
+		elements.add(62392);
+		elements.add(7700);
+		elements.add(77295);
+		elements.add(67772);
+		elements.add(3205);
+		elements.add(12120);
+		elements.add(40215);
+		elements.add(17090);
+		elements.add(37236);
+		elements.add(94163);
+		elements.add(10384);
+		elements.add(19112);
+		elements.add(51758);
+		elements.add(61196);
+		elements.add(25940);
+		elements.add(57314);
+		elements.add(38876);
+		elements.add(76607);
+		elements.add(4319);
+		elements.add(76141);
+		elements.add(1929);
+		elements.add(93426);
+		elements.add(69932);
+		elements.add(30796);
+		elements.add(57357);
+		elements.add(98594);
+		elements.add(55889);
+		elements.add(26006);
+		elements.add(70828);
+		elements.add(61883);
+		elements.add(82252);
+		elements.add(53444);
+		elements.add(899);
+		elements.add(53076);
+		elements.add(74407);
+		elements.add(96163);
+		elements.add(36067);
+		elements.add(63810);
+		elements.add(74231);
+		elements.add(80224);
+		elements.add(1815);
+		elements.add(46312);
+		elements.add(14083);
+		elements.add(18637);
+		elements.add(83080);
+		elements.add(60325);
+		elements.add(69012);
+		elements.add(10803);
+		elements.add(54558);
+		elements.add(1582);
+		elements.add(76122);
+		elements.add(31834);
+		elements.add(36348);
+		elements.add(70498);
+		elements.add(11715);
+		elements.add(70442);
+		elements.add(95676);
+		elements.add(28095);
+		elements.add(46578);
+		elements.add(51547);
+		elements.add(96767);
+		elements.add(77685);
+		elements.add(57731);
+		elements.add(10279);
+		elements.add(60423);
+		elements.add(5478);
+		elements.add(60965);
+		elements.add(67804);
+		elements.add(32451);
+		elements.add(11019);
+		elements.add(42656);
+		elements.add(96147);
+		elements.add(75815);
+		elements.add(59241);
+		elements.add(11652);
+		elements.add(49190);
+		elements.add(95225);
+		elements.add(89942);
+		elements.add(62399);
+		elements.add(80056);
+		elements.add(74871);
+		elements.add(27597);
+		elements.add(39055);
+		elements.add(61281);
+		elements.add(60063);
+		elements.add(44676);
+		elements.add(16958);
+		elements.add(73502);
+		elements.add(41824);
+		elements.add(45049);
+		elements.add(72631);
+		elements.add(30845);
+		elements.add(9760);
+		elements.add(50507);
+		elements.add(96393);
+		elements.add(66713);
+		elements.add(23063);
+		elements.add(93111);
+		elements.add(12707);
+		elements.add(12436);
+		elements.add(12078);
+		elements.add(38797);
+		elements.add(12514);
+		elements.add(62997);
+		elements.add(63561);
+		elements.add(93569);
+		elements.add(69149);
+		elements.add(39030);
+		elements.add(61658);
+		elements.add(72594);
+		elements.add(4780);
+		elements.add(22332);
+		elements.add(53567);
+		elements.add(44667);
+		elements.add(97888);
+		elements.add(63338);
+		elements.add(83937);
+		elements.add(99740);
+		elements.add(73956);
+		elements.add(33312);
+		elements.add(95330);
+		elements.add(25612);
+		elements.add(1316);
+		elements.add(21444);
+		elements.add(23355);
+		elements.add(21367);
+		elements.add(22011);
+		elements.add(57632);
+		elements.add(24606);
+		elements.add(19780);
+		elements.add(83578);
+		elements.add(75397);
+		elements.add(63111);
+		elements.add(38668);
+		elements.add(1796);
+		elements.add(16207);
+		elements.add(46721);
+		elements.add(32029);
+		elements.add(76759);
+		elements.add(16416);
+		elements.add(48730);
+		elements.add(65842);
+		elements.add(5006);
+		elements.add(11109);
+		elements.add(71965);
+		elements.add(493);
+		elements.add(79006);
+		elements.add(35322);
+		elements.add(12717);
+		elements.add(22089);
+		elements.add(41949);
+		elements.add(2422);
+		elements.add(60068);
+		elements.add(28257);
+		elements.add(70565);
+		elements.add(91872);
+		elements.add(22550);
+		elements.add(40564);
+		elements.add(91627);
+		elements.add(84195);
+		elements.add(8528);
+		elements.add(85305);
+		elements.add(98792);
+		elements.add(39599);
+		elements.add(99287);
+		elements.add(57163);
+		elements.add(25658);
+		elements.add(28594);
+		elements.add(44564);
+		elements.add(56125);
+		elements.add(48112);
+		elements.add(87824);
+		elements.add(79053);
+		elements.add(67044);
+		elements.add(34544);
+		elements.add(92434);
+		elements.add(5453);
+		elements.add(33364);
+		elements.add(35971);
+		elements.add(7480);
+		elements.add(14665);
+		elements.add(61771);
+		elements.add(9805);
+		elements.add(5192);
+		elements.add(17011);
+		elements.add(82932);
+		elements.add(785);
+		elements.add(12363);
+		elements.add(39668);
+		elements.add(84964);
+		elements.add(60493);
+		elements.add(82675);
+		elements.add(4999);
+		elements.add(30925);
+		elements.add(72904);
+		elements.add(72492);
+		elements.add(42049);
+		elements.add(69356);
+		elements.add(67608);
+		elements.add(35462);
+		elements.add(99208);
+		elements.add(47788);
+		elements.add(44596);
+		elements.add(41177);
+		elements.add(19882);
+		elements.add(43144);
+		elements.add(4920);
+		elements.add(66272);
+		elements.add(14986);
+		elements.add(30073);
+		elements.add(80092);
+		elements.add(2462);
+		elements.add(16182);
+		elements.add(18521);
+		elements.add(79719);
+		elements.add(75392);
+		elements.add(21987);
+		elements.add(5219);
+		elements.add(31677);
+		elements.add(70580);
+		elements.add(55239);
+		elements.add(282);
+		elements.add(72018);
+		elements.add(18311);
+		elements.add(34892);
+		elements.add(9713);
+		elements.add(52869);
+		elements.add(98048);
+		elements.add(27670);
+		elements.add(77400);
+		elements.add(75701);
+		elements.add(84695);
+		elements.add(85879);
+		elements.add(16042);
+		elements.add(24679);
+		elements.add(74059);
+		elements.add(96490);
+		elements.add(85452);
+		elements.add(70158);
+		elements.add(92848);
+		elements.add(63599);
+		elements.add(8825);
+		elements.add(35990);
+		elements.add(19798);
+		elements.add(21446);
+		elements.add(52794);
+		elements.add(75904);
+		elements.add(18799);
+		elements.add(28431);
+		elements.add(35500);
+		elements.add(84052);
+		elements.add(12335);
+		elements.add(23876);
+		elements.add(68372);
+		elements.add(72704);
+		elements.add(4155);
+		elements.add(38777);
+		elements.add(81983);
+		elements.add(86114);
+		elements.add(93721);
+		elements.add(39382);
+		elements.add(34064);
+		elements.add(83727);
+		elements.add(11861);
+		elements.add(48160);
+		elements.add(48664);
+		elements.add(18220);
+		elements.add(46943);
+		elements.add(30553);
+		elements.add(89435);
+		elements.add(54225);
+		elements.add(23999);
+		elements.add(57904);
+		elements.add(27146);
+		elements.add(22166);
+		elements.add(45368);
+		elements.add(57030);
+		elements.add(21803);
+		elements.add(78276);
+		elements.add(792);
+		elements.add(35142);
+		elements.add(3109);
+		elements.add(46647);
+		elements.add(7320);
+		elements.add(25159);
+		elements.add(99508);
+		elements.add(52090);
+		elements.add(44918);
+		elements.add(30934);
+		elements.add(35702);
+		elements.add(13603);
+		elements.add(12433);
+		elements.add(64511);
+		elements.add(91263);
+		elements.add(57404);
+		elements.add(40303);
+		elements.add(58251);
+		elements.add(88839);
+		elements.add(25789);
+		elements.add(61415);
+		elements.add(3523);
+		elements.add(59495);
+		elements.add(3466);
+		elements.add(59524);
+		elements.add(14598);
+		elements.add(14795);
+		elements.add(56563);
+		elements.add(85872);
+		elements.add(41540);
+		elements.add(40552);
+		elements.add(81151);
+		elements.add(58956);
+		elements.add(59032);
+		elements.add(15498);
+		elements.add(87942);
+		elements.add(39818);
+		elements.add(39508);
+		elements.add(49669);
+		elements.add(7692);
+		elements.add(5818);
+		elements.add(78353);
+		elements.add(31900);
+		elements.add(87904);
+		elements.add(29533);
+		elements.add(76597);
+		elements.add(73596);
+		elements.add(65569);
+		elements.add(6242);
+		elements.add(2218);
+		elements.add(36825);
+		elements.add(42980);
+		elements.add(63392);
+		elements.add(45007);
+		elements.add(38762);
+		elements.add(64054);
+		elements.add(28523);
+		elements.add(51964);
+		elements.add(31675);
+		elements.add(87138);
+		elements.add(28306);
+		elements.add(80237);
+		elements.add(67870);
+		elements.add(76937);
+		elements.add(40671);
+		elements.add(32884);
+		elements.add(72395);
+		elements.add(92978);
+		elements.add(24435);
+		elements.add(49066);
+		elements.add(62828);
+		elements.add(34945);
+		elements.add(6428);
+		elements.add(4736);
+		elements.add(75078);
+		elements.add(16252);
+		elements.add(14783);
+		elements.add(42532);
+		elements.add(76885);
+		//elements.add(76371);
+		elements.add(8872);
+		elements.add(90248);
+		elements.add(76610);
+		elements.add(9732);
+		elements.add(71347);
+		elements.add(46153);
+		elements.add(63872);
+		elements.add(84422);
+		elements.add(95754);
+		elements.add(6377);
+		elements.add(50741);
+		elements.add(47424);
+		elements.add(24437);
+		elements.add(84671);
+		elements.add(17451);
+		elements.add(64821);
+		elements.add(65717);
+		elements.add(28103);
+		elements.add(4965);
+		elements.add(25169);
+		elements.add(46818);
+		elements.add(63575);
+		elements.add(38235);
+		elements.add(42146);
+		elements.add(39527);
+		elements.add(19507);
+		elements.add(8621);
+		elements.add(28621);
+		elements.add(29319);
+		elements.add(54681);
+		elements.add(91701);
+		elements.add(78459);
+		elements.add(85457);
+		elements.add(91903);
+		elements.add(27576);
+		elements.add(84641);
+		elements.add(29532);
+		elements.add(98020);
+		elements.add(44758);
+		elements.add(42714);
+		elements.add(92976);
+		elements.add(73806);
+		elements.add(65909);
+		elements.add(37099);
+		elements.add(267);
+		elements.add(17307);
+		elements.add(93883);
+		elements.add(84463);
+		elements.add(13869);
+		elements.add(2474);
+		elements.add(39970);
+		elements.add(13122);
+		elements.add(29381);
+		//elements.add(71257);
+		elements.add(22701);
+		elements.add(90391);
+		elements.add(14940);
+		elements.add(71808);
+		elements.add(35207);
+		elements.add(70785);
+		elements.add(47632);
+		elements.add(88016);
+		elements.add(51910);
+		elements.add(27178);
+		elements.add(11430);
+		elements.add(96377);
+		elements.add(21154);
+		elements.add(44279);
+		elements.add(86201);
+		elements.add(54963);
+		elements.add(69432);
+		elements.add(99217);
+		elements.add(75296);
+		elements.add(76321);
+		elements.add(24971);
+		elements.add(27552);
+		elements.add(90516);
+		elements.add(61156);
+		elements.add(53688);
+		elements.add(74688);
+		elements.add(37494);
+		elements.add(72909);
+		elements.add(88928);
+		elements.add(62453);
+		elements.add(22022);
+		elements.add(14694);
+		elements.add(27883);
+		elements.add(58521);
+		elements.add(28395);
+		elements.add(29509);
+		elements.add(62217);
+		elements.add(22388);
+		elements.add(4535);
+		elements.add(82244);
+		elements.add(8198);
+		elements.add(15757);
+		elements.add(25491);
+		elements.add(97743);
+		elements.add(2488);
+		elements.add(7510);
+		elements.add(96830);
+		elements.add(23007);
+		elements.add(33769);
+		elements.add(73811);
+		elements.add(2520);
+		elements.add(53593);
+		elements.add(87500);
+		elements.add(92449);
+		elements.add(98087);
+		elements.add(14402);
+		elements.add(91354);
+		elements.add(57177);
+		elements.add(99147);
+		elements.add(13210);
+		elements.add(62274);
+		elements.add(92602);
+		elements.add(17851);
+		elements.add(91704);
+		elements.add(72573);
+		elements.add(33064);
+		elements.add(55361);
+		elements.add(83210);
+		elements.add(72146);
+		elements.add(40008);
+		elements.add(67141);
+		elements.add(48932);
+		elements.add(26615);
+		elements.add(71499);
+		elements.add(79705);
+		elements.add(5216);
+		elements.add(57096);
+		elements.add(84805);
+		elements.add(52344);
+		elements.add(73232);
+		elements.add(96297);
+		elements.add(48404);
+		elements.add(45497);
+		elements.add(79401);
+		elements.add(7763);
+		elements.add(63297);
+		elements.add(78543);
+		elements.add(10030);
+		elements.add(50373);
+		elements.add(45157);
+		elements.add(34175);
+		elements.add(76814);
+		elements.add(8521);
+		elements.add(98652);
+		elements.add(93913);
+		elements.add(81219);
+		elements.add(49978);
+		elements.add(23170);
+		elements.add(69904);
+		elements.add(75245);
+		elements.add(18010);
+		elements.add(25227);
+		elements.add(31831);
+		elements.add(3642);
+		elements.add(12102);
+		elements.add(76979);
+		elements.add(14595);
+		elements.add(78398);
+		elements.add(62526);
+		elements.add(52559);
+		elements.add(32335);
+		elements.add(80146);
+		elements.add(57975);
+		elements.add(94376);
+		elements.add(17469);
+		elements.add(3134);
+		elements.add(42632);
+		elements.add(10016);
+		elements.add(49576);
+		elements.add(60460);
+		elements.add(59273);
+		elements.add(77094);
+		elements.add(38307);
+		elements.add(44553);
+		elements.add(78418);
+		elements.add(38140);
+		elements.add(76905);
+		elements.add(94169);
+		elements.add(20010);
+		elements.add(559);
+		elements.add(88529);
+		elements.add(53684);
+		elements.add(43762);
+		elements.add(17693);
+		elements.add(46229);
+		elements.add(23057);
+		elements.add(57033);
+		elements.add(16227);
+		elements.add(59247);
+		elements.add(87537);
+		elements.add(65018);
+		elements.add(52410);
+		elements.add(83289);
+		elements.add(85069);
+		elements.add(66987);
+		elements.add(25021);
+		elements.add(30418);
+		elements.add(16295);
+		elements.add(84491);
+		elements.add(46501);
+		elements.add(25485);
+		elements.add(27169);
+		elements.add(92656);
+		elements.add(75383);
+		elements.add(80257);
+		elements.add(97406);
+		elements.add(14112);
+		elements.add(42882);
+		elements.add(33903);
+		elements.add(49357);
+		elements.add(26568);
+		elements.add(64458);
+		elements.add(39033);
+		elements.add(51341);
+		elements.add(29696);
+		elements.add(13188);
+		elements.add(56173);
+		elements.add(27109);
+		elements.add(14748);
+		elements.add(45925);
+		elements.add(56403);
+		elements.add(98781);
+		elements.add(81166);
+		elements.add(15552);
+		elements.add(21804);
+		elements.add(84507);
+		elements.add(48519);
+		elements.add(72987);
+		elements.add(76415);
+		elements.add(44009);
+		elements.add(19147);
+		elements.add(61189);
+		elements.add(76643);
+		elements.add(15326);
+		elements.add(57231);
+		elements.add(30041);
+		elements.add(39320);
+		elements.add(14253);
+		elements.add(63309);
+		elements.add(55780);
+		elements.add(88087);
+		elements.add(74338);
+		elements.add(39821);
+		elements.add(31548);
+		elements.add(54346);
+		elements.add(89773);
+		elements.add(62862);
+		elements.add(6696);
+		elements.add(77689);
+		elements.add(86107);
+		elements.add(98084);
+		elements.add(91599);
+		elements.add(12560);
+		elements.add(84430);
+		elements.add(24578);
+		elements.add(12053);
+		elements.add(62816);
+		elements.add(43534);
+		elements.add(59548);
+		elements.add(92718);
+		elements.add(33963);
+		elements.add(61518);
+		elements.add(8744);
+		elements.add(72626);
+		elements.add(13973);
+		elements.add(93416);
+		elements.add(2851);
+		elements.add(7398);
+		elements.add(67968);
+		elements.add(94627);
+		elements.add(18431);
+		elements.add(92645);
+		elements.add(59456);
+		elements.add(31300);
+		elements.add(23502);
+		elements.add(50898);
+		elements.add(91384);
+		elements.add(8289);
+		elements.add(32472);
+		elements.add(60469);
+		elements.add(93966);
+		elements.add(52872);
+		elements.add(2917);
+		elements.add(68806);
+		elements.add(73065);
+		elements.add(58190);
+		elements.add(57530);
+		elements.add(25170);
+		elements.add(72823);
+		elements.add(34170);
+		elements.add(68627);
+		elements.add(87897);
+		elements.add(99351);
+		elements.add(35695);
+		elements.add(99667);
+		elements.add(10036);
+		elements.add(98418);
+		elements.add(37873);
+		elements.add(58546);
+		elements.add(83788);
+		elements.add(79450);
+		elements.add(6470);
+		elements.add(80779);
+		elements.add(29012);
+		elements.add(30558);
+		elements.add(67941);
+		elements.add(27182);
+		elements.add(43911);
+		elements.add(74893);
+		elements.add(17949);
+		elements.add(50314);
+		elements.add(97091);
+		elements.add(77324);
+		elements.add(19858);
+		elements.add(56692);
+		elements.add(29328);
+		elements.add(22217);
+		elements.add(35428);
+		elements.add(67637);
+		elements.add(50667);
+		elements.add(48103);
+		elements.add(98761);
+		elements.add(60672);
+		elements.add(63884);
+		elements.add(42998);
+		elements.add(91542);
+		elements.add(55458);
+		elements.add(18881);
+		elements.add(75419);
+		elements.add(2707);
+		elements.add(93562);
+		elements.add(4239);
+		elements.add(60389);
+		elements.add(58888);
+		elements.add(49692);
+		elements.add(11954);
+		elements.add(37208);
+		elements.add(93348);
+		elements.add(3562);
+		elements.add(69266);
+		elements.add(66302);
+		elements.add(80571);
+		elements.add(96159);
+		elements.add(17546);
+		elements.add(36187);
+		elements.add(1286);
+		elements.add(91960);
+		elements.add(32363);
+		elements.add(8364);
+		elements.add(18426);
+		elements.add(69503);
+		elements.add(21133);
+		elements.add(17940);
+		elements.add(38356);
+		elements.add(66741);
+		elements.add(5160);
+		elements.add(90800);
+		elements.add(3694);
+		elements.add(14721);
+		elements.add(91433);
+		elements.add(34380);
+		elements.add(14131);
+		elements.add(3389);
+		elements.add(66167);
+		elements.add(8380);
+		elements.add(99902);
+		elements.add(36706);
+		elements.add(96901);
+		elements.add(84215);
+		elements.add(78878);
+		elements.add(50759);
+		elements.add(12857);
+		elements.add(57564);
+		elements.add(12734);
+		elements.add(88175);
+		elements.add(44286);
+		elements.add(87060);
+		elements.add(40271);
+		elements.add(44915);
+		elements.add(40718);
+		elements.add(93996);
+		elements.add(6634);
+		elements.add(31387);
+		elements.add(55292);
+		elements.add(72845);
+		elements.add(26089);
+		elements.add(18826);
+		elements.add(77767);
+		elements.add(30481);
+		elements.add(12924);
+		elements.add(74037);
+		elements.add(22340);
+		elements.add(93148);
+		elements.add(90193);
+		elements.add(20805);
+		elements.add(28066);
+		elements.add(94585);
+		elements.add(39205);
+		elements.add(4717);
+		elements.add(9455);
+		elements.add(86100);
+		elements.add(84033);
+		elements.add(79585);
+		elements.add(2735);
+		elements.add(90007);
+		elements.add(14784);
+		elements.add(78331);
+		elements.add(89295);
+		elements.add(51499);
+		elements.add(40951);
+		elements.add(78925);
+		elements.add(41998);
+		elements.add(30848);
+		elements.add(31923);
+		elements.add(26860);
+		elements.add(32329);
+		elements.add(17782);
+		elements.add(45551);
+		elements.add(29635);
+		elements.add(56752);
+		elements.add(42936);
+		elements.add(67649);
+		elements.add(95870);
+		elements.add(89189);
+		elements.add(7481);
+		elements.add(85405);
+		elements.add(51905);
+		elements.add(43200);
+		int i=0;
+		for (Integer e : elements) {
+			
+			assertFalse("Find non existing element  "+i+"  "+e.intValue()+"  ", avl.search(e));
+			i++;
+			avl.insert(e);
+			assertTrue("Can't non existing element", avl.search(e));
+			}
+	}
+
+	@org.junit.Test(timeout = 7000)
+	public static void testLoad() {
+		IDictionary dict = new MyDictionary();
+		File input = new File("src//eg//edu//alexu//csd//filestructure//avl//cs28//res//dictionary.txt");
+		dict.load(input);
+		assertEquals(9123, dict.size()); // out of the 10,000 input words, there
+											// are only 9123 unique words
+		assertEquals(16, dict.height());
+	}
+
+	@org.junit.Test(timeout = 10000)
+	public static void testLookup() throws FileNotFoundException {
+		IDictionary dict = new MyDictionary();
+		File dictFile = new File("src//eg//edu//alexu//csd//filestructure//avl//cs28//res//dictionary.txt");
+		dict.load(dictFile);
+		File inputFile = new File("src//eg//edu//alexu//csd//filestructure//avl//cs28//res//queries.txt");
+		Scanner sc = new Scanner(inputFile);
+		// there are 15 queries. the first 10 exist, and the remaining 5 don't
+		for (int i = 0; i < 10; ++i)
+			assertTrue(dict.exists(sc.next()));
+		for (int i = 0; i < 5; ++i)
+			assertFalse(dict.exists(sc.next()));
+		sc.close();
+	}
+
+	@org.junit.Test(timeout = 7000)
+	public static void testDeleteFromDictionary() throws FileNotFoundException {
+		IDictionary dict = new MyDictionary();
+		File dictFile = new File("src//eg//edu//alexu//csd//filestructure//avl//cs28//res//dictionary.txt");
+		dict.load(dictFile);
+		File inputFile = new File("src//eg//edu//alexu//csd//filestructure//avl//cs28//res//deletions.txt");
+		Scanner sc = new Scanner(inputFile);
+		// there are 300 words to delete, but only 290 unique words in them
+		while (sc.hasNext())
+			dict.delete(sc.next());
+		sc.close();
+		assertEquals(9123 - 290, dict.size()); // out of the 10,000 input words,
+												// there are only 9123 unique
+												// words
+		assertEquals(15, dict.height());
+	}
+
+	public static class AVLUtil<T extends Comparable<T>> {
+		public boolean validateAVL(INode<T> root) {
+			return validateBST(root) && checkBalance(root);
+		}
+
+		public boolean validateBST(INode<T> root) {
+			if (root == null)
+				return true;
+
+			ArrayList<T> inOrder = new ArrayList<T>();
+			inOrderTraversal(root, inOrder);
+			for (int i = 1; i < inOrder.size(); ++i) {
+				if (inOrder.get(i).compareTo(inOrder.get(i - 1)) < 0)
+					return false;
+			}
+			return true;
+		}
+
+		private void inOrderTraversal(INode<T> node, ArrayList<T> list) {
+			if (node == null)
+				return;
+			inOrderTraversal(node.getLeftChild(), list);
+			list.add(node.getValue());
+			inOrderTraversal(node.getRightChild(), list);
+		}
+
+		public boolean checkBalance(INode<T> root) {
+			return checkBalanceAux(root) != -1;
+		}
+
+		private int checkBalanceAux(INode<T> node) {
+			if (node == null)
+				return 0;
+			int left = checkBalanceAux(node.getLeftChild());
+			int right = checkBalanceAux(node.getRightChild());
+			if (left == -1 || right == -1)
+				return -1;
+			if (Math.abs(left - right) > 1) {
+				return -1;
+			}
+			return 1 + Math.max(left, right);
+		}
+	}
 }
